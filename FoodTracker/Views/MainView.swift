@@ -15,13 +15,24 @@ struct MainView: View {
         NavigationStack {
             VStack {
                 // List of restaurants and intolerances
-                List {
-                    ForEach(viewModel.dummyData) { restaurant in
-                        Section(header: Text(restaurant.name)) {
-                            ForEach(restaurant.foodItems, id: \.id) { food in
-                                NavigationLink(food.foodName, value: food)
-                            }
-                        }.headerProminence(.increased)
+                // TODO: CHANGE THE ! BACK WHEN DONE
+                if !viewModel.savedData.isEmpty {
+                    Text("No intolerances recorded yet. Tap the '+' button in the top right corner to add one.")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .padding()
+                    Spacer()
+                }
+                else {
+                    List {
+                        ForEach(viewModel.dummyData) { restaurant in
+                            Section(header: Text(restaurant.name)) {
+                                ForEach(restaurant.foodItems, id: \.id) { food in
+                                    NavigationLink(food.foodName, value: food)
+                                }
+                            }.headerProminence(.increased)
+                        }
                     }
                 }
             }

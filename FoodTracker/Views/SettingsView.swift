@@ -21,7 +21,6 @@ struct SettingsView: View {
                 Text("This is a settings page")
                 Spacer()
             }
-            .shadow(radius: 20)
             .frame(maxWidth: .infinity)
             .cornerRadius(20)
             .padding()
@@ -34,7 +33,9 @@ struct SettingsView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: viewModel.close) {
-                        Label("Done", systemImage: "")
+                        Text("Done")
+                            .foregroundStyle(.blue)
+                            .font(.headline)
                     }
                 }
             }
