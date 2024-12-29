@@ -15,7 +15,9 @@ struct DetailedView: View {
     }
     
     var body: some View {
-        Text("Awh, did \(viewModel.intolerance.foodName) hurt your tummy?")
+        VStack {
+            Text("Awh, did \(viewModel.intolerance.foodName) hurt your tummy?")
+        }.navigationTitle("Details")
     }
 }
 

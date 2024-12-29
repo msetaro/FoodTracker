@@ -11,4 +11,5 @@ struct Intolerance: Identifiable, Equatable, Hashable {
     var id: UUID = UUID()
     var foodName: String
     var symptoms: [Symptom] = []
+    var severity: Int = -1           // 1-10
 }

@@ -12,13 +12,16 @@ extension MainView {
     class ViewModel: ObservableObject {
         
         @State var dummyData = Restaurant.sample
+        @Published var isSettingsOpen = false
         
         func addItem() {
             
         }
         
         func showSettings() {
-            
+            withAnimation {
+                isSettingsOpen.toggle()
+            }
         }
     }
 }

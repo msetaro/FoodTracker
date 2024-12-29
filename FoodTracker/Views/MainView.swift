@@ -14,6 +14,7 @@ struct MainView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                // List of restaurants and intolerances
                 List {
                     ForEach(viewModel.dummyData) { restaurant in
                         Section(header: Text(restaurant.name)) {
@@ -32,16 +33,18 @@ struct MainView: View {
                 // Settings
                 ToolbarItem(placement: .navigation) {
                     Button(action: viewModel.showSettings) {
-                        Label("Settings", systemImage: "gear")
+                        Label("Settings", systemImage: "gear")}
                     }
-                }
                 
                 // Add item
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: viewModel.addItem) {
-                        Label("Add", systemImage: "plus")
+                        Label("Add", systemImage: "plus.circle.fill")
                     }
                 }
+            }
+            .sheet(isPresented: $viewModel.isSettingsOpen) {
+                SettingsView(isSettingsOpen: $viewModel.isSettingsOpen)
             }
         }
     }
