@@ -15,8 +15,7 @@ struct MainView: View {
         NavigationStack {
             VStack {
                 // List of restaurants and intolerances
-                // TODO: CHANGE THE ! BACK WHEN DONE
-                if !viewModel.savedData.isEmpty {
+                if viewModel.savedData.isEmpty {
                     Text("No intolerances recorded yet. Tap the '+' button in the top right corner to add one.")
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -25,20 +24,20 @@ struct MainView: View {
                     Spacer()
                 }
                 else {
-                    List {
-                        ForEach(viewModel.dummyData) { restaurant in
-                            Section(header: Text(restaurant.name)) {
-                                ForEach(restaurant.foodItems, id: \.id) { food in
-                                    NavigationLink(food.foodName, value: food)
-                                }
-                            }.headerProminence(.increased)
-                        }
-                    }
+//                    List {
+//                        ForEach(viewModel.savedData) { restaurant in
+//                            Section(header: Text(restaurant.name)) {
+//                                ForEach(restaurant.foodItems, id: \.id) { food in
+//                                    NavigationLink(food.foodName, value: food)
+//                                }
+//                            }.headerProminence(.increased)
+//                        }
+//                    }
                 }
             }
             .navigationTitle("Foods")
             .navigationDestination(for: Intolerance.self) { intolerance in
-                DetailedView(intolerance: intolerance)
+                DetailedView(selectedIntolerance: intolerance, isUpdate: true)
             }
             .toolbar {
                 // Settings
@@ -49,7 +48,7 @@ struct MainView: View {
                 
                 // Add item
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: viewModel.addItem) {
+                    NavigationLink(destination: DetailedView(selectedIntolerance: Intolerance.blank, isUpdate: false)) {
                         Label("Add", systemImage: "plus.circle.fill")
                     }
                 }

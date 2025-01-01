@@ -11,7 +11,6 @@ import SwiftUICore
 extension MainView {
     class ViewModel: ObservableObject {
         
-        @State var dummyData = Restaurant.sample
         @State var savedData: [Restaurant] = []
         @Published var isSettingsOpen = false
         

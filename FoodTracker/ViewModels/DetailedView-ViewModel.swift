@@ -15,5 +15,11 @@ extension DetailedView {
         init(intolerance: Intolerance) {
             self.intolerance = intolerance
         }
+        
+        func save(intolerance: Intolerance)
+        {
+            // TODO: Save intolerance to swift data
+            
+        }
     }
 }

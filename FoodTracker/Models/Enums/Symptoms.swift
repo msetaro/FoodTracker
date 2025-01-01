@@ -7,6 +7,17 @@
 
 import Foundation
 
-enum Symptom {
-    case nausea, diarrhea, vomiting, cramps, headache, fatigue, bloating, gas, constipation, skin
+enum Symptom: String, Codable, CaseIterable {
+    case nausea = "Nausea 🤢"
+    case diarrhea = "Diarrhea 💩"
+    case vomiting = "Vomiting 🤮"
+    case cramps = "Cramps 🥴"
+    case headache = "Headache 🤕"
+    case fatigue = "Fatigue 😴"
+    case bloating = "Bloating 🤰"
+    case gas = "Gas 💨"
+    case constipation = "Constipation 🚫"
+    case skin = "Skin 🧴"
+    case other = "Other 🆘"
 }
+
