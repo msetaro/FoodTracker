@@ -14,10 +14,6 @@ extension MainView {
         @State var savedData: [Restaurant] = []
         @Published var isSettingsOpen = false
         
-        func addItem() {
-            
-        }
-        
         func showSettings() {
             withAnimation {
                 isSettingsOpen.toggle()

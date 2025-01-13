@@ -6,16 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainView: View {
     
     @StateObject var viewModel = ViewModel()
+    @Query private var savedData: [Restaurant]
+    @Environment(\.modelContext) private var modelContext
+
     
     var body: some View {
         NavigationStack {
             VStack {
                 // List of restaurants and intolerances
-                if viewModel.savedData.isEmpty {
+                if savedData.isEmpty {
                     Text("No intolerances recorded yet. Tap the '+' button in the top right corner to add one.")
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -24,20 +28,21 @@ struct MainView: View {
                     Spacer()
                 }
                 else {
-//                    List {
-//                        ForEach(viewModel.savedData) { restaurant in
-//                            Section(header: Text(restaurant.name)) {
-//                                ForEach(restaurant.foodItems, id: \.id) { food in
-//                                    NavigationLink(food.foodName, value: food)
-//                                }
-//                            }.headerProminence(.increased)
-//                        }
-//                    }
+                    List {
+                        ForEach(savedData) { restaurant in
+                            Section(header: Text(restaurant.name)) {
+                                ForEach(restaurant.intolerances, id: \.id) { food in
+                                    NavigationLink(food.foodName, value: food)
+                                }
+                                .onDelete(perform: deleteIntolerance)
+                            }.headerProminence(.increased)
+                        }
+                    }
                 }
             }
             .navigationTitle("Foods")
             .navigationDestination(for: Intolerance.self) { intolerance in
-                DetailedView(selectedIntolerance: intolerance, isUpdate: true)
+                DetailedView(selectedIntolerance: intolerance, correspondingRestaurant: intolerance.restaurant)
             }
             .toolbar {
                 // Settings
@@ -48,7 +53,7 @@ struct MainView: View {
                 
                 // Add item
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink(destination: DetailedView(selectedIntolerance: Intolerance.blank, isUpdate: false)) {
+                    NavigationLink(destination: DetailedView(selectedIntolerance: nil, correspondingRestaurant: nil)) {
                         Label("Add", systemImage: "plus.circle.fill")
                     }
                 }
@@ -58,7 +63,22 @@ struct MainView: View {
             }
         }
     }
-}
+    
+    private func deleteIntolerance(offsets: IndexSet) {
+        withAnimation {
+            for index in offsets {
+                modelContext.delete(savedData[index])
+            }
+        }
+        
+        do {
+            try modelContext.save()
+        }
+        catch {
+            print("errror saving changes when deleting")
+        }
+    }
+ }
 
 #Preview {
     MainView()

@@ -12,20 +12,18 @@ import SwiftData
 final class Intolerance: Identifiable, Equatable, Hashable {
     var id: UUID = UUID()
     
+    weak var restaurant: Restaurant?
     var foodName: String
-    var restaurantId: UUID
-    
     var symptoms: [Symptom] = []
     var severity: Int = -1 // 1-10
     
-    init(foodName: String, restaurantId: UUID, symptoms: [Symptom], severity: Int) {
+    init(foodName: String, symptoms: [Symptom], severity: Int) {
         self.foodName = foodName
-        self.restaurantId = restaurantId
         self.symptoms = symptoms
         self.severity = severity
     }
     
     static var blank: Intolerance {
-        Intolerance(foodName: "", restaurantId: UUID(), symptoms: [], severity: -1)
+        Intolerance(foodName: "", symptoms: [], severity: -1)
     }
 }

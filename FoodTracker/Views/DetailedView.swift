@@ -6,36 +6,32 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct DetailedView: View {
-    
+    @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) var presentationMode
-
-    @StateObject private var viewModel: ViewModel
     
-    var selectedIntolerance: Intolerance
+    @State var selectedIntolerance: Intolerance?
+    @State var correspondingRestaurant: Restaurant?
     var isUpdate: Bool
-    
-    // User input
-    @State var restaurantName: String = ""
-    
-    @State var foodItemName: String = ""
-    
-    @State var symptoms: [Symptom] = [.bloating]
-    
-    @State var severity: Int = 1
-    
-    @State var isAlertShowing: Bool = false
     
     private var showAlert: Bool {
         !restaurantName.isEmpty || !foodItemName.isEmpty || !symptoms.isEmpty || severity > 1
     }
     
+    @State var isAlertShowing: Bool = false
     
-    init(selectedIntolerance: Intolerance, isUpdate: Bool) {
-        _viewModel = StateObject(wrappedValue: ViewModel(intolerance: selectedIntolerance))
+    // User input
+    @State var restaurantName: String = ""
+    @State var foodItemName: String = ""
+    @State var symptoms: [Symptom] = [.bloating]
+    @State var severity: Int = 1
+
+    init(selectedIntolerance: Intolerance?, correspondingRestaurant: Restaurant?) {
         self.selectedIntolerance = selectedIntolerance
-        self.isUpdate = isUpdate
+        self.correspondingRestaurant = correspondingRestaurant
+        self.isUpdate = selectedIntolerance != nil && correspondingRestaurant != nil
     }
     
     var body: some View {
@@ -108,8 +104,9 @@ struct DetailedView: View {
                 
                 Button(action: {
                     // Save to SwiftData
+                    save(foodItemName: foodItemName, restaurantName: restaurantName, severity: severity, symptoms: symptoms)
                     
-                    
+                    // dismiss page
                     presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("Save")
@@ -123,6 +120,17 @@ struct DetailedView: View {
         .navigationTitle(isUpdate ? "Update Intolerance" : "Add Intolerance")
         .background(Color.secondary.opacity(0.1))
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            // Ensure the values are set once the view appears
+            if let intolerance = selectedIntolerance {
+                restaurantName = intolerance.restaurant?.name ?? ""
+                foodItemName = intolerance.foodName
+                symptoms = intolerance.symptoms
+                severity = intolerance.severity
+            } else if let restaurant = correspondingRestaurant {
+                restaurantName = restaurant.name
+            }
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -149,8 +157,81 @@ struct DetailedView: View {
             Text("You have unsaved changes. Are you sure you want to go back?")
         }
     }
+    
+    func save(foodItemName: String, restaurantName: String, severity: Int, symptoms: [Symptom]) {
+        
+        let intol: Intolerance = Intolerance(foodName: foodItemName, symptoms: symptoms, severity: severity)
+        var rest: Restaurant? = nil
+        
+        // a new intolerance
+        if(correspondingRestaurant == nil) {
+            
+            
+            // check if restaurant exists
+            rest = getRestaurant(name: restaurantName)
+            
+            // add intolerance to this restaurant
+            rest?.intolerances.append(intol)
+        }
+        // editing an intolerance
+        else {
+            // if the restaurant name was changed, query the model context for the restaurant by name
+            if(restaurantName != correspondingRestaurant?.name) {
+                rest = getRestaurant(name: restaurantName)
+                
+                // add intolerance to this restaurant
+                rest?.intolerances.append(intol)
+                
+                // remove reference to old restaurant
+                selectedIntolerance = nil
+            }
+            // update in place
+            else {
+                // might need a binding to change if this doesnt work
+                selectedIntolerance?.foodName = foodItemName
+                selectedIntolerance?.severity = severity
+                selectedIntolerance?.symptoms = symptoms
+            }
+        }
+        
+        // save to model context
+        context.insert(rest!)
+        
+        do {
+            try context.save()
+        }
+        catch {
+            print("error while saving model context")
+        }
+    }
+    
+    private func getRestaurant(name: String) -> Restaurant {
+        var rest: Restaurant
+        let fetchDesc = FetchDescriptor<Restaurant>(predicate: #Predicate { restaurant in
+            restaurant.name == name
+        })
+        
+        do {
+            // Attempt to fetch the restaurant
+            let exists = try context.fetch(fetchDesc)
+            if let existingRestaurant = exists.first {
+                rest = existingRestaurant
+            } else {
+                // If no restaurant matches, create a new one
+                rest = Restaurant(name: name)
+                context.insert(rest) // Add the new restaurant to the context
+            }
+        } catch {
+            // Handle fetch errors (e.g., malformed predicate)
+            print("Fetch error: \(error)")
+            rest = Restaurant(name: name)
+        }
+
+        
+        return rest
+    }
 }
 
 #Preview {
-    DetailedView(selectedIntolerance: Intolerance(foodName: "chicken nuggets", restaurantId: UUID(), symptoms: [], severity: 5), isUpdate: false)
+    DetailedView(selectedIntolerance: Intolerance(foodName: "chicken nuggets", symptoms: [], severity: 5), correspondingRestaurant: nil)
 }
