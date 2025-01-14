@@ -9,6 +9,9 @@ import SwiftUI
 
 struct SymptomSelectionView: View {
     @Binding var selectedItems: Set<Symptom>
+    @AppStorage("appAppearance") private var appAppearance: SystemAppearence = .light
+    @Environment(\.colorScheme) var systemColorScheme
+    
     
     var body: some View {
         NavigationView {
@@ -29,7 +32,9 @@ struct SymptomSelectionView: View {
                     }
                 }
             }
-        }.navigationTitle("Select Symptoms")
+        }
+        .navigationTitle("Select Symptoms")
+        .preferredColorScheme(appAppearance == .dark ? .dark : .light)
     }
     
     private func toggleSelection(for symptom: Symptom) {

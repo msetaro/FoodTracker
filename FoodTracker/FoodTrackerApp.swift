@@ -10,6 +10,7 @@ import SwiftData
 
 @main
 struct FoodTrackerApp: App {
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Restaurant.self,

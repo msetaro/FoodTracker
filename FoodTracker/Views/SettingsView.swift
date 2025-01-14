@@ -11,6 +11,15 @@ struct SettingsView: View {
     
     @StateObject var viewModel: ViewModel
     
+    @AppStorage("appAppearance") private var appAppearance: SystemAppearence = .light
+    @Environment(\.colorScheme) var systemColorScheme
+
+    @State private var selectedAppearance: SystemAppearence = .light
+    
+    private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    private let appBuild = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+
+    
     init(isSettingsOpen: Binding<Bool>) {
         _viewModel = StateObject(wrappedValue: ViewModel(binding: isSettingsOpen))
     }
@@ -18,13 +27,26 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             VStack() {
-                Text("This is a settings page")
+                List {
+                    Picker("Theme", selection: $selectedAppearance) {
+                        Text("Light").tag(SystemAppearence.light)
+                        Text("Dark").tag(SystemAppearence.dark)
+                    }.onChange(of: selectedAppearance) { oldValue, newValue in
+                        handleAppearanceChange(newValue)
+                    }
+                }
                 Spacer()
+                Text("Version \(appVersion ?? "") build \(appBuild ?? "")")
+                    .foregroundStyle(.tertiary)
+                    .padding(.bottom, 50)
             }
             .frame(maxWidth: .infinity)
             .cornerRadius(20)
-            .padding()
+            .background(Color.secondary.opacity(0.1))
             .ignoresSafeArea(edges: .bottom)
+            .onAppear {
+                selectedAppearance = appAppearance
+            }
             .toolbar {
                 ToolbarItem(placement: .principal) {
                     Text("Settings")
@@ -40,6 +62,13 @@ struct SettingsView: View {
                 }
             }
         }
+        .preferredColorScheme(selectedAppearance == .dark ? .dark : .light)
+
+    }
+    
+    func handleAppearanceChange(_ value: SystemAppearence) {
+        // update backing
+        UserDefaults.standard.set(value.rawValue, forKey: "appAppearance")
     }
 }
 

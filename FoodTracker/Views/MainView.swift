@@ -13,8 +13,9 @@ struct MainView: View {
     @StateObject var viewModel = ViewModel()
     @Query private var savedData: [Restaurant]
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("appAppearance") private var appAppearance: SystemAppearence = .light
+    @Environment(\.colorScheme) var systemColorScheme
 
-    
     var body: some View {
         NavigationStack {
             VStack {
@@ -55,6 +56,7 @@ struct MainView: View {
                 }
             }
             .navigationTitle("Foods")
+            .preferredColorScheme(appAppearance == .dark ? .dark : .light)
             .navigationDestination(for: Intolerance.self) { intolerance in
                 DetailedView(selectedIntolerance: intolerance, correspondingRestaurant: intolerance.restaurant)
             }

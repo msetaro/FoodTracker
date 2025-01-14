@@ -11,6 +11,8 @@ import SwiftData
 struct DetailedView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) var presentationMode
+    @AppStorage("appAppearance") private var appAppearance: SystemAppearence = .light
+    @Environment(\.colorScheme) var systemColorScheme
     
     @State var selectedIntolerance: Intolerance?
     @State var correspondingRestaurant: Restaurant?
@@ -67,7 +69,7 @@ struct DetailedView: View {
                                 Text("None")
                                     .foregroundColor(.gray)
                             } else {
-                                var cols = [
+                                let cols = [
                                     GridItem(.adaptive(minimum: 100), spacing: 0),
                                     GridItem(.adaptive(minimum: 100), spacing: 0)
                                 ]
@@ -141,6 +143,7 @@ struct DetailedView: View {
         }
         .navigationTitle(isUpdate ? "Update Intolerance" : "Add Intolerance")
         .background(Color.secondary.opacity(0.1))
+        .preferredColorScheme(appAppearance == .dark ? .dark : .light)
         .navigationBarBackButtonHidden(true)
         .onAppear {
             if !hasInitialized {
