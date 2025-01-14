@@ -10,10 +10,10 @@ import SwiftUICore
 
 extension MainView {
     class ViewModel: ObservableObject {
-        
+
         @State var savedData: [Restaurant] = []
         @Published var isSettingsOpen = false
-        
+
         func showSettings() {
             withAnimation {
                 isSettingsOpen.toggle()

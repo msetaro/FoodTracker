@@ -13,7 +13,7 @@ final class Restaurant: Identifiable, Hashable {
     var id: UUID = UUID()
     var name: String = ""
     var intolerances: [Intolerance] = []
-    
+
     init(name: String) {
         self.name = name
     }

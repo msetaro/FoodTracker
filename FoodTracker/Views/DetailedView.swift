@@ -13,18 +13,18 @@ struct DetailedView: View {
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("appAppearance") private var appAppearance: SystemAppearance = .light
     @Environment(\.colorScheme) var systemColorScheme
-    
+
     @State var selectedIntolerance: Intolerance?
     @State var correspondingRestaurant: Restaurant?
     var isUpdate: Bool
-    
+
     private var showAlert: Bool {
         !restaurantName.isEmpty || !foodItemName.isEmpty || !symptoms.isEmpty || severity > 1
     }
-    
+
     @State var isAlertShowing: Bool = false
     @State var hasInitialized: Bool = false
-    
+
     // User input
     @State var restaurantName: String = ""
     @State var foodItemName: String = ""
@@ -36,20 +36,20 @@ struct DetailedView: View {
         self.correspondingRestaurant = correspondingRestaurant
         self.isUpdate = selectedIntolerance != nil && correspondingRestaurant != nil
     }
-    
+
     var body: some View {
         VStack {
             VStack {
                 List {
-                    // Resturant
+                    // Restaurant
                     Section {
                         TextField("Restaurant name", text: $restaurantName)
                     } header: {
-                        Text("Resturant")
+                        Text("Restaurant")
                     } footer: {
                         Text("The restaurant you ordered from")
                     }
-                    
+
                     // Food item
                     Section {
                         TextField("Food name", text: $foodItemName)
@@ -58,7 +58,7 @@ struct DetailedView: View {
                     } footer: {
                         Text("The food that you ate")
                     }
-                    
+
                     // Symptoms
                     Section {
                         NavigationLink(
@@ -96,16 +96,16 @@ struct DetailedView: View {
                     } footer: {
                         Text("Your symptoms after eating the food")
                     }
-                    
+
                     // Severity
                     Section {
                         VStack {
                             Text("\(severity)")
-                            
+
                             HStack {
                                 Text("1")
                                     .foregroundStyle(.secondary)
-                                
+
                                 Slider(
                                     value: Binding<Double>(
                                         get: { Double(severity) },
@@ -113,7 +113,7 @@ struct DetailedView: View {
                                     ),
                                     in: 1...10,
                                     step: 1)
-                                
+
                                 Text("10")
                                     .foregroundStyle(.secondary)
                             }
@@ -125,14 +125,8 @@ struct DetailedView: View {
                         Text("The severity of your symptoms after eating the food")
                     }
                 }
-                
-                Button(action: {
-                    // Save to SwiftData
-                    save(foodItemName: foodItemName, restaurantName: restaurantName, severity: severity, symptoms: symptoms)
-                    
-                    // dismiss page
-                    presentationMode.wrappedValue.dismiss()
-                }) {
+
+                Button(action: onSavePressed) {
                     Text("Save")
                         .frame(maxWidth: .infinity, maxHeight: 40) // Makes the button span the full width
                 }
@@ -156,19 +150,13 @@ struct DetailedView: View {
                 } else if let restaurant = correspondingRestaurant {
                     restaurantName = restaurant.name
                 }
-                
+
                 hasInitialized = true
             }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    if showAlert {
-                        isAlertShowing = true
-                    } else {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }) {
+                Button(action: onBackPressed) {
                     HStack {
                         Image(systemName: "chevron.left")
                             .fontWeight(.medium)
@@ -186,67 +174,87 @@ struct DetailedView: View {
             Text("You have unsaved changes. Are you sure you want to go back?")
         }
     }
-    
-    func save(foodItemName: String, restaurantName: String, severity: Int, symptoms: Set<Symptom>) {
-        
+
+    private func onBackPressed() {
+        if showAlert {
+            isAlertShowing = true
+        } else {
+            presentationMode.wrappedValue.dismiss()
+        }
+    }
+
+    private func onSavePressed() {
+        // Save to SwiftData
+        save(
+            foodItemName: foodItemName,
+            restaurantName: restaurantName,
+            severity: severity,
+            symptoms: symptoms
+        )
+
+        // dismiss page
+        presentationMode.wrappedValue.dismiss()
+    }
+
+    private func save(foodItemName: String, restaurantName: String, severity: Int, symptoms: Set<Symptom>) {
+
         let intol: Intolerance = Intolerance(foodName: foodItemName, symptoms: symptoms, severity: severity)
         var rest: Restaurant? = correspondingRestaurant
-        
+
         // a new intolerance
-        if(correspondingRestaurant == nil) {
-            
-            
+        if correspondingRestaurant == nil {
+
             // check if restaurant exists
             rest = getRestaurant(name: restaurantName)
-            
+
             // add intolerance to this restaurant
             rest?.intolerances.append(intol)
         }
         // editing an intolerance
         else {
             // if the restaurant name was changed, query the model context for the restaurant by name
-            if(restaurantName != correspondingRestaurant!.name) {
+            if restaurantName != correspondingRestaurant!.name {
                 rest = getRestaurant(name: restaurantName)
-                
+
                 // add intolerance to this restaurant
                 rest?.intolerances.append(intol)
-                
+
                 // remove reference to old restaurant
                 let idx = correspondingRestaurant!.intolerances.firstIndex(of: selectedIntolerance!)
                 correspondingRestaurant!.intolerances.remove(at: idx!)
-                
+
                 // if there are no more intolerances for this old restaurant now
                 // need to delete it
-                if(correspondingRestaurant!.intolerances.isEmpty) {
+                if correspondingRestaurant!.intolerances.isEmpty {
                     context.delete(correspondingRestaurant!)
                 }
             }
             // update in place
             else {
-                // might need a binding to change if this doesnt work
+                // might need a binding to change if this doesn't work
                 selectedIntolerance?.foodName = foodItemName
                 selectedIntolerance?.severity = severity
                 selectedIntolerance?.symptoms = symptoms
             }
         }
-        
+
         // save to model context
         context.insert(rest!)
-        
+
         do {
             try context.save()
-        }
-        catch {
+        } catch {
             print("error while saving model context")
         }
+
     }
-    
+
     private func getRestaurant(name: String) -> Restaurant {
         var rest: Restaurant
         let fetchDesc = FetchDescriptor<Restaurant>(predicate: #Predicate { restaurant in
             restaurant.name == name
         })
-        
+
         do {
             // Attempt to fetch the restaurant
             let exists = try context.fetch(fetchDesc)
@@ -263,11 +271,17 @@ struct DetailedView: View {
             rest = Restaurant(name: name)
         }
 
-        
         return rest
     }
 }
 
 #Preview {
-    DetailedView(selectedIntolerance: Intolerance(foodName: "chicken nuggets", symptoms: [.bloating, .constipation, .cramps], severity: 5), correspondingRestaurant: nil)
+    DetailedView(
+        selectedIntolerance:
+            Intolerance(
+                foodName: "chicken nuggets",
+                symptoms: [.bloating, .constipation, .cramps],
+                severity: 5
+            ),
+        correspondingRestaurant: nil)
 }

@@ -8,30 +8,29 @@
 import SwiftUI
 
 struct SettingsView: View {
-    
+
     @StateObject var viewModel: ViewModel
-    
+
     @AppStorage("appAppearance") private var appAppearance: SystemAppearance = .light
     @Environment(\.colorScheme) var systemColorScheme
 
     @State private var selectedAppearance: SystemAppearance = .light
-    
+
     private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     private let appBuild = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
 
-    
     init(isSettingsOpen: Binding<Bool>) {
         _viewModel = StateObject(wrappedValue: ViewModel(binding: isSettingsOpen))
     }
-    
+
     var body: some View {
         NavigationStack {
-            VStack() {
+            VStack {
                 List {
                     Picker("Theme", selection: $selectedAppearance) {
                         Text("Light").tag(SystemAppearance.light)
                         Text("Dark").tag(SystemAppearance.dark)
-                    }.onChange(of: selectedAppearance) { oldValue, newValue in
+                    }.onChange(of: selectedAppearance) { _, newValue in
                         handleAppearanceChange(newValue)
                     }
                 }
@@ -52,7 +51,7 @@ struct SettingsView: View {
                     Text("Settings")
                         .font(.headline)
                 }
-                
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: viewModel.close) {
                         Text("Done")
@@ -65,7 +64,7 @@ struct SettingsView: View {
         .preferredColorScheme(selectedAppearance == .dark ? .dark : .light)
 
     }
-    
+
     func handleAppearanceChange(_ value: SystemAppearance) {
         // update backing
         UserDefaults.standard.set(value.rawValue, forKey: "appAppearance")

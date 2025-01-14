@@ -15,13 +15,13 @@ final class Intolerance: Identifiable, Equatable, Hashable {
     var symptoms: Set<Symptom> = []
     var severity: Int = -1
     weak var restaurant: Restaurant?
-    
+
     init(foodName: String, symptoms: Set<Symptom>, severity: Int) {
         self.foodName = foodName
         self.symptoms = symptoms
         self.severity = severity
     }
-    
+
     static var blank: Intolerance {
         Intolerance(foodName: "", symptoms: [], severity: -1)
     }

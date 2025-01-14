@@ -20,4 +20,3 @@ enum Symptom: String, Codable, CaseIterable {
     case skin = "Skin 🧴"
     case other = "Other 🆘"
 }
-

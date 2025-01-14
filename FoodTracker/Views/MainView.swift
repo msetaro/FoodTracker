@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct MainView: View {
-    
+
     @StateObject var viewModel = ViewModel()
     @Query private var savedData: [Restaurant]
     @Environment(\.modelContext) private var modelContext
@@ -27,8 +27,7 @@ struct MainView: View {
                         .foregroundStyle(.secondary)
                         .padding()
                     Spacer()
-                }
-                else {
+                } else {
                     List {
                         ForEach(savedData) { restaurant in
                             Section(header: Text(restaurant.name)) {
@@ -66,7 +65,7 @@ struct MainView: View {
                     Button(action: viewModel.showSettings) {
                         Label("Settings", systemImage: "gear")}
                     }
-                
+
                 // Add item
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink(destination: DetailedView(selectedIntolerance: nil, correspondingRestaurant: nil)) {
@@ -79,20 +78,20 @@ struct MainView: View {
             }
         }
     }
-    
+
     private func deleteIntolerance(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
                 modelContext.delete(savedData[index])
             }
         }
-        
+
         do {
             try modelContext.save()
+        } catch {
+            print("error saving changes when deleting")
         }
-        catch {
-            print("errror saving changes when deleting")
-        }
+
     }
  }
 

@@ -11,8 +11,7 @@ struct SymptomSelectionView: View {
     @Binding var selectedItems: Set<Symptom>
     @AppStorage("appAppearance") private var appAppearance: SystemAppearance = .light
     @Environment(\.colorScheme) var systemColorScheme
-    
-    
+
     var body: some View {
         NavigationView {
             List {
@@ -36,7 +35,7 @@ struct SymptomSelectionView: View {
         .navigationTitle("Select Symptoms")
         .preferredColorScheme(appAppearance == .dark ? .dark : .light)
     }
-    
+
     private func toggleSelection(for symptom: Symptom) {
         if selectedItems.contains(symptom) {
             selectedItems.remove(symptom) // Deselect
