@@ -11,11 +11,10 @@ import SwiftData
 @Model
 final class Intolerance: Identifiable, Equatable, Hashable {
     var id: UUID = UUID()
-    
-    weak var restaurant: Restaurant?
-    var foodName: String
+    var foodName: String = ""
     var symptoms: Set<Symptom> = []
-    var severity: Int = -1 // 1-10
+    var severity: Int = -1
+    weak var restaurant: Restaurant?
     
     init(foodName: String, symptoms: Set<Symptom>, severity: Int) {
         self.foodName = foodName

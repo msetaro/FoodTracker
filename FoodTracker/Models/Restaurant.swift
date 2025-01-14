@@ -1,5 +1,5 @@
 //
-//  Resturant.swift
+//  Restaurant.swift
 //  FoodTracker
 //
 //  Created by Matthew Setaro on 12/29/24.
@@ -11,8 +11,7 @@ import SwiftData
 @Model
 final class Restaurant: Identifiable, Hashable {
     var id: UUID = UUID()
-    
-    var name: String
+    var name: String = ""
     var intolerances: [Intolerance] = []
     
     init(name: String) {

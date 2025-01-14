@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SymptomSelectionView: View {
     @Binding var selectedItems: Set<Symptom>
-    @AppStorage("appAppearance") private var appAppearance: SystemAppearence = .light
+    @AppStorage("appAppearance") private var appAppearance: SystemAppearance = .light
     @Environment(\.colorScheme) var systemColorScheme
     
     

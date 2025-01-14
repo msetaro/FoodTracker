@@ -11,10 +11,10 @@ struct SettingsView: View {
     
     @StateObject var viewModel: ViewModel
     
-    @AppStorage("appAppearance") private var appAppearance: SystemAppearence = .light
+    @AppStorage("appAppearance") private var appAppearance: SystemAppearance = .light
     @Environment(\.colorScheme) var systemColorScheme
 
-    @State private var selectedAppearance: SystemAppearence = .light
+    @State private var selectedAppearance: SystemAppearance = .light
     
     private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     private let appBuild = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
@@ -29,8 +29,8 @@ struct SettingsView: View {
             VStack() {
                 List {
                     Picker("Theme", selection: $selectedAppearance) {
-                        Text("Light").tag(SystemAppearence.light)
-                        Text("Dark").tag(SystemAppearence.dark)
+                        Text("Light").tag(SystemAppearance.light)
+                        Text("Dark").tag(SystemAppearance.dark)
                     }.onChange(of: selectedAppearance) { oldValue, newValue in
                         handleAppearanceChange(newValue)
                     }
@@ -66,7 +66,7 @@ struct SettingsView: View {
 
     }
     
-    func handleAppearanceChange(_ value: SystemAppearence) {
+    func handleAppearanceChange(_ value: SystemAppearance) {
         // update backing
         UserDefaults.standard.set(value.rawValue, forKey: "appAppearance")
     }

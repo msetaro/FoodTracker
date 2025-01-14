@@ -11,7 +11,7 @@ import SwiftData
 struct DetailedView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) var presentationMode
-    @AppStorage("appAppearance") private var appAppearance: SystemAppearence = .light
+    @AppStorage("appAppearance") private var appAppearance: SystemAppearance = .light
     @Environment(\.colorScheme) var systemColorScheme
     
     @State var selectedIntolerance: Intolerance?

@@ -13,7 +13,7 @@ struct MainView: View {
     @StateObject var viewModel = ViewModel()
     @Query private var savedData: [Restaurant]
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("appAppearance") private var appAppearance: SystemAppearence = .light
+    @AppStorage("appAppearance") private var appAppearance: SystemAppearance = .light
     @Environment(\.colorScheme) var systemColorScheme
 
     var body: some View {
