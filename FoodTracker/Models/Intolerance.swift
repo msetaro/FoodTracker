@@ -14,10 +14,10 @@ final class Intolerance: Identifiable, Equatable, Hashable {
     
     weak var restaurant: Restaurant?
     var foodName: String
-    var symptoms: [Symptom] = []
+    var symptoms: Set<Symptom> = []
     var severity: Int = -1 // 1-10
     
-    init(foodName: String, symptoms: [Symptom], severity: Int) {
+    init(foodName: String, symptoms: Set<Symptom>, severity: Int) {
         self.foodName = foodName
         self.symptoms = symptoms
         self.severity = severity

@@ -21,11 +21,12 @@ struct DetailedView: View {
     }
     
     @State var isAlertShowing: Bool = false
+    @State var hasInitialized: Bool = false
     
     // User input
     @State var restaurantName: String = ""
     @State var foodItemName: String = ""
-    @State var symptoms: [Symptom] = [.bloating]
+    @State var symptoms: Set<Symptom> = []
     @State var severity: Int = 1
 
     init(selectedIntolerance: Intolerance?, correspondingRestaurant: Restaurant?) {
@@ -58,15 +59,36 @@ struct DetailedView: View {
                     
                     // Symptoms
                     Section {
-                        ScrollView(.horizontal) {
-                            HStack {
-                                ForEach(Symptom.allCases, id: \.self) { symptom in
-                                    Text(symptom.rawValue)
-                                        .padding()
-                                }
-                            }.padding(10)
+                        NavigationLink(
+                            destination: SymptomSelectionView(selectedItems: $symptoms)
+                        ) {
+                            // Symptoms chips
+                            if symptoms.isEmpty {
+                                Text("None")
+                                    .foregroundColor(.gray)
+                            } else {
+                                var cols = [
+                                    GridItem(.adaptive(minimum: 100), spacing: 0),
+                                    GridItem(.adaptive(minimum: 100), spacing: 0)
+                                ]
+                                LazyVGrid(columns: cols, spacing: 5) {
+                                    ForEach(Array(symptoms), id: \.self) { symptom in
+                                        Text(symptom.rawValue)
+                                            .font(.body)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.blue.opacity(0.1))
+                                            .cornerRadius(20)
+                                            .foregroundColor(.blue)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 20)
+                                                    .stroke(Color.blue, lineWidth: 1)
+                                            )
+                                            .padding(2)
+                                    }
+                                }.frame(maxWidth: .infinity)
+                            }
                         }
-                        .frame(height: 55)
                     } header: {
                         Text("Symptoms")
                     } footer: {
@@ -121,14 +143,18 @@ struct DetailedView: View {
         .background(Color.secondary.opacity(0.1))
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            // Ensure the values are set once the view appears
-            if let intolerance = selectedIntolerance {
-                restaurantName = intolerance.restaurant?.name ?? ""
-                foodItemName = intolerance.foodName
-                symptoms = intolerance.symptoms
-                severity = intolerance.severity
-            } else if let restaurant = correspondingRestaurant {
-                restaurantName = restaurant.name
+            if !hasInitialized {
+                // Ensure the values are set once the view appears
+                if let intolerance = selectedIntolerance {
+                    restaurantName = intolerance.restaurant?.name ?? ""
+                    foodItemName = intolerance.foodName
+                    symptoms = intolerance.symptoms
+                    severity = intolerance.severity
+                } else if let restaurant = correspondingRestaurant {
+                    restaurantName = restaurant.name
+                }
+                
+                hasInitialized = true
             }
         }
         .toolbar {
@@ -158,10 +184,10 @@ struct DetailedView: View {
         }
     }
     
-    func save(foodItemName: String, restaurantName: String, severity: Int, symptoms: [Symptom]) {
+    func save(foodItemName: String, restaurantName: String, severity: Int, symptoms: Set<Symptom>) {
         
         let intol: Intolerance = Intolerance(foodName: foodItemName, symptoms: symptoms, severity: severity)
-        var rest: Restaurant? = nil
+        var rest: Restaurant? = correspondingRestaurant
         
         // a new intolerance
         if(correspondingRestaurant == nil) {
@@ -176,14 +202,21 @@ struct DetailedView: View {
         // editing an intolerance
         else {
             // if the restaurant name was changed, query the model context for the restaurant by name
-            if(restaurantName != correspondingRestaurant?.name) {
+            if(restaurantName != correspondingRestaurant!.name) {
                 rest = getRestaurant(name: restaurantName)
                 
                 // add intolerance to this restaurant
                 rest?.intolerances.append(intol)
                 
                 // remove reference to old restaurant
-                selectedIntolerance = nil
+                let idx = correspondingRestaurant!.intolerances.firstIndex(of: selectedIntolerance!)
+                correspondingRestaurant!.intolerances.remove(at: idx!)
+                
+                // if there are no more intolerances for this old restaurant now
+                // need to delete it
+                if(correspondingRestaurant!.intolerances.isEmpty) {
+                    context.delete(correspondingRestaurant!)
+                }
             }
             // update in place
             else {
@@ -233,5 +266,5 @@ struct DetailedView: View {
 }
 
 #Preview {
-    DetailedView(selectedIntolerance: Intolerance(foodName: "chicken nuggets", symptoms: [], severity: 5), correspondingRestaurant: nil)
+    DetailedView(selectedIntolerance: Intolerance(foodName: "chicken nuggets", symptoms: [.bloating, .constipation, .cramps], severity: 5), correspondingRestaurant: nil)
 }

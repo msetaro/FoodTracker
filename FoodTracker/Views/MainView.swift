@@ -31,8 +31,22 @@ struct MainView: View {
                     List {
                         ForEach(savedData) { restaurant in
                             Section(header: Text(restaurant.name)) {
-                                ForEach(restaurant.intolerances, id: \.id) { food in
-                                    NavigationLink(food.foodName, value: food)
+                                ForEach(restaurant.intolerances, id: \.id) { intolerance in
+                                    NavigationLink(value: intolerance) {
+                                        VStack(alignment: .leading) {
+                                            HStack {
+                                                Text(intolerance.foodName)
+                                                    .fontWeight(.medium)
+                                                Text("\(intolerance.severity)/10")
+                                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                            }
+                                            .padding(2)
+                                            Text(intolerance.symptoms.map(\.rawValue).joined(separator: ", "))
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        .frame(maxHeight: 50)
+                                        .clipped()
+                                    }
                                 }
                                 .onDelete(perform: deleteIntolerance)
                             }.headerProminence(.increased)
